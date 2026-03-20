@@ -10,7 +10,8 @@ export type SidebarKey =
   | 'chat'
   | 'board'
   | 'manage'
-  | 'insights';
+  | 'insights'
+  | 'allFeatures';
 
 export type NavVariant = 'chapter' | 'withInsights' | 'generator';
 

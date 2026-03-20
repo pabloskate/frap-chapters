@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Feature Nav Prototype</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0d1117;
+    --bg-card: #161b22;
+    --bg-card-hover: #1c2128;
+    --border: #30363d;
+    --border-light: #21262d;
+    --text: #f0f6fc;
+    --text-muted: #8b949e;
+    --text-dim: #4a5568;
+    --yellow: #e3b341;
+    --yellow-dim: rgba(227,179,65,0.15);
+    --yellow-subtle: rgba(227,179,65,0.06);
+    --green: #3fb950;
+    --blue: #58a6ff;
+    --purple: #bc8cff;
+    --red: #f85149;
+    --orange: #ffa657;
+    --radius: 10px;
+    --radius-lg: 14px;
+    --sidebar-w: 240px;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    --ease: 0.16s ease;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--text);
+    height: 100vh;
+    display: flex;
+    overflow: hidden;
+  }
+
+  /* ────────────────────────────────────────────
+     SIDEBAR
+  ──────────────────────────────────────────── */
+  .sidebar {
+    width: var(--sidebar-w);
+    background: var(--bg-card);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    height: 100vh;
+  }
+
+  .sidebar-logo {
+    padding: 18px 18px 14px;
+    border-bottom: 1px solid var(--border-light);
+    flex-shrink: 0;
+  }
+  .sidebar-logo-mark {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--yellow);
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+  }
+  .sidebar-logo-sub {
+    font-size: 10.5px;
+    color: var(--text-dim);
+    margin-top: 2px;
+  }
+
+  .sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 0 10px;
+    scrollbar-width: none;
+  }
+  .sidebar-scroll::-webkit-scrollbar { display: none; }
+
+  .sidebar-label {
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.9px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    padding: 10px 18px 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    padding: 7px 18px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--ease), background var(--ease);
+    user-select: none;
+  }
+  .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+  .nav-item.active {
+    color: var(--yellow);
+    background: var(--yellow-dim);
+  }
+  .nav-item.active::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 2px; bottom: 2px;
+    width: 3px;
+    background: var(--yellow);
+    border-radius: 0 3px 3px 0;
+  }
+  .nav-item .ni-icon {
+    width: 15px; height: 15px;
+    flex-shrink: 0;
+    opacity: 0.65;
+  }
+  .nav-item.active .ni-icon,
+  .nav-item:hover .ni-icon { opacity: 1; }
+
+  .nav-item .ni-emoji {
+    font-size: 13px;
+    line-height: 1;
+    width: 15px;
+    flex-shrink: 0;
+    text-align: center;
+  }
+
+  .nav-item .ni-remove {
+    margin-left: auto;
+    opacity: 0;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1;
+    padding: 1px 3px;
+    border-radius: 3px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    transition: opacity var(--ease), color var(--ease);
+    font-family: var(--font);
+  }
+  .nav-item:hover .ni-remove { opacity: 1; }
+  .nav-item .ni-remove:hover { color: var(--red); }
+
+  .nav-empty {
+    padding: 6px 18px;
+    font-size: 11.5px;
+    color: var(--text-dim);
+    font-style: italic;
+    line-height: 1.5;
+  }
+
+  .sidebar-bottom {
+    padding: 10px 0;
+    border-top: 1px solid var(--border-light);
+    flex-shrink: 0;
+  }
+
+  /* All Features nav item — slightly special */
+  .nav-item.all-features-item {
+    color: var(--text-muted);
+    font-weight: 600;
+  }
+  .nav-item.all-features-item .ni-icon { opacity: 0.8; }
+  .nav-item.all-features-item:hover { color: var(--text); }
+  .nav-item.all-features-item.active {
+    color: var(--yellow);
+    background: var(--yellow-dim);
+  }
+
+  /* ────────────────────────────────────────────
+     MAIN CONTENT SHELL
+  ──────────────────────────────────────────── */
+  .main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
+
+  /* ── Page switcher (simple SPA) ── */
+  .page { display: none; flex-direction: column; flex: 1; overflow: hidden; }
+  .page.active { display: flex; }
+
+  /* ────────────────────────────────────────────
+     HOME PAGE
+  ──────────────────────────────────────────── */
+  .home-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 32px 36px;
+  }
+
+  .home-greeting {
+    margin-bottom: 28px;
+  }
+  .home-greeting h1 {
+    font-size: 20px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 3px;
+  }
+  .home-greeting p {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .hint-banner {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--yellow-subtle);
+    border: 1px solid rgba(227,179,65,0.18);
+    border-radius: var(--radius);
+    padding: 11px 14px;
+    margin-bottom: 24px;
+    font-size: 12.5px;
+    color: var(--text-muted);
+    line-height: 1.5;
+  }
+  .hint-banner strong { color: var(--yellow); }
+
+  .dash-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-bottom: 12px;
+  }
+
+  .dash-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 20px;
+  }
+  .dash-card h3 {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.6px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+  }
+  .ph { height: 9px; background: var(--border); border-radius: 4px; margin-bottom: 7px; }
+  .ph:last-child { margin-bottom: 0; }
+  .ph.s { width: 55%; }
+  .ph.m { width: 75%; }
+  .ph.l { width: 90%; }
+
+  /* ────────────────────────────────────────────
+     ALL FEATURES PAGE
+  ──────────────────────────────────────────── */
+
+  /* Sticky top bar */
+  .features-topbar {
+    flex-shrink: 0;
+    background: var(--bg-card);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 28px 0;
+  }
+
+  .features-search-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .features-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    white-space: nowrap;
+  }
+
+  .search-box {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 12px;
+    transition: border-color var(--ease);
+  }
+  .search-box:focus-within { border-color: rgba(227,179,65,0.5); }
+  .search-box svg { width: 14px; height: 14px; color: var(--text-dim); flex-shrink: 0; }
+  .search-box input {
+    flex: 1;
+    background: none;
+    border: none;
+    outline: none;
+    font-size: 13px;
+    font-family: var(--font);
+    color: var(--text);
+    caret-color: var(--yellow);
+  }
+  .search-box input::placeholder { color: var(--text-dim); }
+  .search-count {
+    font-size: 11px;
+    color: var(--text-dim);
+    white-space: nowrap;
+  }
+
+  /* Filter tabs (sit at bottom of topbar like tabs) */
+  .features-tabs {
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .features-tabs::-webkit-scrollbar { display: none; }
+
+  .tab-btn {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+    cursor: pointer;
+    border: none;
+    background: none;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    white-space: nowrap;
+    transition: color var(--ease), border-color var(--ease);
+    font-family: var(--font);
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active {
+    color: var(--yellow);
+    border-bottom-color: var(--yellow);
+  }
+  .tab-count {
+    font-size: 10px;
+    background: var(--bg-card-hover);
+    border: 1px solid var(--border-light);
+    border-radius: 10px;
+    padding: 1px 6px;
+    color: var(--text-dim);
+  }
+  .tab-btn.active .tab-count {
+    background: var(--yellow-dim);
+    border-color: rgba(227,179,65,0.3);
+    color: var(--yellow);
+  }
+
+  /* Features scroll body */
+  .features-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 28px;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-light) transparent;
+  }
+
+  /* Recent chips row */
+  .recent-section {
+    margin-bottom: 28px;
+  }
+  .section-label {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+    margin-bottom: 10px;
+  }
+  .recent-chips {
+    display: flex;
+    gap: 7px;
+    flex-wrap: wrap;
+  }
+  .recent-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 11px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: 7px;
+    font-size: 12px;
+    color: var(--text-muted);
+    cursor: pointer;
+    transition: all var(--ease);
+  }
+  .recent-chip:hover { border-color: var(--border); color: var(--text); background: var(--bg-card-hover); }
+
+  /* Category group */
+  .cat-group { margin-bottom: 32px; }
+  .cat-group:last-child { margin-bottom: 0; }
+
+  .cat-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .cat-name {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.8px;
+    text-transform: uppercase;
+    color: var(--text-dim);
+  }
+  .cat-line { flex: 1; height: 1px; background: var(--border-light); }
+  .cat-count { font-size: 10px; color: var(--text-dim); }
+
+  /* Tile grid */
+  .tile-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(186px, 1fr));
+    gap: 8px;
+  }
+
+  .tile {
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+    padding: 14px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius);
+    cursor: pointer;
+    transition: border-color var(--ease), background var(--ease), transform var(--ease);
+    position: relative;
+  }
+  .tile:hover {
+    border-color: var(--border);
+    background: var(--bg-card-hover);
+    transform: translateY(-1px);
+  }
+  .tile.pinned {
+    border-color: rgba(227,179,65,0.28);
+    background: rgba(227,179,65,0.04);
+  }
+  .tile.pinned:hover {
+    border-color: rgba(227,179,65,0.45);
+    background: rgba(227,179,65,0.08);
+  }
+
+  .tile-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+  }
+  .tile-icon {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+  }
+  .tile-star {
+    opacity: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 5px;
+    color: var(--text-dim);
+    transition: opacity var(--ease), color var(--ease), transform var(--ease);
+    display: flex;
+    align-items: center;
+  }
+  .tile:hover .tile-star { opacity: 1; }
+  .tile-star.on { opacity: 1; color: var(--yellow); }
+  .tile-star:hover { transform: scale(1.2); }
+  .tile-star svg { width: 13px; height: 13px; }
+
+  .tile-name {
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.3;
+  }
+  .tile-desc {
+    font-size: 11px;
+    color: var(--text-muted);
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .hl { color: var(--yellow); font-weight: 600; }
+
+  /* No results */
+  .no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--text-muted);
+  }
+  .no-results .nr-emoji { font-size: 28px; margin-bottom: 10px; }
+  .no-results p { font-size: 13.5px; }
+  .no-results small { font-size: 12px; color: var(--text-dim); }
+
+  /* ────────────────────────────────────────────
+     TOAST
+  ──────────────────────────────────────────── */
+  .toast {
+    position: fixed;
+    bottom: 20px;
+    left: calc(var(--sidebar-w) + 50%);
+    transform: translateX(-50%) translateY(6px);
+    background: #1e2530;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 14px;
+    font-size: 12.5px;
+    color: var(--text);
+    opacity: 0;
+    transition: opacity 0.18s, transform 0.18s;
+    pointer-events: none;
+    white-space: nowrap;
+    z-index: 200;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SIDEBAR
+══════════════════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="sidebar-logo-mark">Profit Academy</div>
+    <div class="sidebar-logo-sub">FRAP Chapter Platform</div>
+  </div>
+
+  <div class="sidebar-scroll">
+    <!-- Core -->
+    <div class="nav-item active" id="nav-home" onclick="goPage('home')">
+      <svg class="ni-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+        <polyline points="9 22 9 12 15 12 15 22"/>
+      </svg>
+      Home
+    </div>
+
+    <!-- Pinned -->
+    <div class="sidebar-label">Pinned</div>
+    <div id="pinnedNav"></div>
+  </div>
+
+  <div class="sidebar-bottom">
+    <div class="nav-item all-features-item" id="nav-features" onclick="goPage('features')">
+      <svg class="ni-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="3" y="3" width="7" height="7" rx="1"/>
+        <rect x="14" y="3" width="7" height="7" rx="1"/>
+        <rect x="3" y="14" width="7" height="7" rx="1"/>
+        <rect x="14" y="14" width="7" height="7" rx="1"/>
+      </svg>
+      All Features
+    </div>
+  </div>
+</aside>
+
+<!-- ═══════════════════════════════════════════
+     MAIN
+══════════════════════════════════════════════ -->
+<div class="main">
+
+  <!-- ── HOME PAGE ── -->
+  <div class="page active" id="page-home">
+    <div class="home-body">
+      <div class="home-greeting">
+        <h1>Good morning 👋</h1>
+        <p>Here's what's happening with your chapter today.</p>
+      </div>
+
+      <div class="hint-banner">
+        <span>💡</span>
+        <div>
+          <strong>Prototype:</strong> Click <strong>All Features</strong> in the sidebar to browse and pin tools. Star any tile to add it to your sidebar.
+        </div>
+      </div>
+
+      <div class="dash-grid">
+        <div class="dash-card">
+          <h3>Chapter Activity</h3>
+          <div class="ph l"></div>
+          <div class="ph m"></div>
+          <div class="ph s"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Recent Wins</h3>
+          <div class="ph m"></div>
+          <div class="ph l"></div>
+          <div class="ph s"></div>
+        </div>
+      </div>
+      <div class="dash-card" style="margin-bottom:12px">
+        <h3>Swap Board Highlights</h3>
+        <div class="ph l"></div>
+        <div class="ph m"></div>
+        <div class="ph s"></div>
+        <div class="ph m" style="margin-top:4px"></div>
+      </div>
+      <div class="dash-grid">
+        <div class="dash-card">
+          <h3>Dream 20 Progress</h3>
+          <div class="ph m"></div>
+          <div class="ph s"></div>
+          <div class="ph l"></div>
+        </div>
+        <div class="dash-card">
+          <h3>Course Progress</h3>
+          <div class="ph s"></div>
+          <div class="ph l"></div>
+          <div class="ph m"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ALL FEATURES PAGE ── -->
+  <div class="page" id="page-features">
+
+    <!-- Sticky top bar -->
+    <div class="features-topbar">
+      <div class="features-search-row">
+        <span class="features-title">All Features</span>
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/>
+          </svg>
+          <input
+            id="featSearch"
+            type="text"
+            placeholder="Search features…"
+            oninput="renderFeatures()"
+            autocomplete="off"
+            spellcheck="false"
+          />
+        </div>
+        <span class="search-count" id="searchCount"></span>
+      </div>
+      <div class="features-tabs" id="featTabs">
+        <!-- populated by JS -->
+      </div>
+    </div>
+
+    <!-- Scrollable content -->
+    <div class="features-body" id="featBody">
+      <!-- populated by JS -->
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ─── DATA ──────────────────────────────────────────────────────────────────
+const FEATURES = [
+  { id:'roster',      name:'Chapter Roster',       desc:'View and manage all chapter members',               cat:'Chapter',      icon:'👥', color:'#58a6ff', bg:'rgba(88,166,255,0.15)' },
+  { id:'chat',        name:'Chapter Chat',          desc:'Real-time messaging with your chapter',             cat:'Chapter',      icon:'💬', color:'#39d353', bg:'rgba(57,211,83,0.15)' },
+  { id:'swapboard',   name:'Swap Board',            desc:'Trade warm leads and introductions',                cat:'Chapter',      icon:'🔄', color:'#ffa657', bg:'rgba(255,166,87,0.15)' },
+  { id:'nationwide',  name:'Nationwide Wins',       desc:'Celebrate wins across all FRAP chapters',           cat:'Chapter',      icon:'🏆', color:'#e3b341', bg:'rgba(227,179,65,0.15)' },
+  { id:'manage',      name:'Manage Chapter',        desc:'Chapter settings, roles, and admin tools',          cat:'Chapter',      icon:'⚙️', color:'#8b949e', bg:'rgba(139,148,158,0.15)' },
+  { id:'access',      name:'Access Control',        desc:'Manage member permissions and access levels',       cat:'Chapter',      icon:'🔐', color:'#f85149', bg:'rgba(248,81,73,0.15)' },
+
+  { id:'socialmgr',   name:'Social Media Manager', desc:'Schedule and manage social content at scale',        cat:'Marketing',    icon:'📱', color:'#bc8cff', bg:'rgba(188,140,255,0.15)' },
+  { id:'context',     name:'Context Engine',        desc:'Your brand voice, tone, and positioning hub',       cat:'Marketing',    icon:'🎯', color:'#ff7eb6', bg:'rgba(255,126,182,0.15)' },
+  { id:'chatbot',     name:'Embedded Chatbot',      desc:'AI chatbot trained on your business',               cat:'Marketing',    icon:'🤖', color:'#39d353', bg:'rgba(57,211,83,0.15)' },
+  { id:'emailseq',    name:'Email Sequences',       desc:'Automated drip campaigns and follow-ups',           cat:'Marketing',    icon:'✉️', color:'#58a6ff', bg:'rgba(88,166,255,0.15)' },
+  { id:'contentcal',  name:'Content Calendar',      desc:'Plan and visualize your content schedule',          cat:'Marketing',    icon:'📅', color:'#e3b341', bg:'rgba(227,179,65,0.15)' },
+
+  { id:'dream20',     name:'Dream 20 Builder',      desc:'Build and track your top 20 target accounts',      cat:'CRM',          icon:'⭐', color:'#e3b341', bg:'rgba(227,179,65,0.15)' },
+  { id:'dream100',    name:'Dream 100s',             desc:'Identify and engage your 100 dream clients',       cat:'CRM',          icon:'💎', color:'#bc8cff', bg:'rgba(188,140,255,0.15)' },
+  { id:'competitors', name:'Competitors',            desc:'Track and analyze your competitive landscape',      cat:'CRM',          icon:'🔍', color:'#f85149', bg:'rgba(248,81,73,0.15)' },
+  { id:'pipeline',    name:'Lead Pipeline',          desc:'Visual sales pipeline from lead to close',         cat:'CRM',          icon:'🚀', color:'#3fb950', bg:'rgba(63,185,80,0.15)' },
+  { id:'referral',    name:'Referral Tracker',       desc:'Track all referrals sent and received',            cat:'CRM',          icon:'🤝', color:'#ffa657', bg:'rgba(255,166,87,0.15)' },
+
+  { id:'employees',   name:'Employees',              desc:'Manage your team and staff directory',              cat:'HR',           icon:'🧑‍💼', color:'#58a6ff', bg:'rgba(88,166,255,0.15)' },
+  { id:'jobs',        name:'Jobs',                   desc:'Post openings and track applicants',                cat:'HR',           icon:'📋', color:'#39d353', bg:'rgba(57,211,83,0.15)' },
+  { id:'perf',        name:'Performance Reviews',    desc:'Run structured reviews and set goals',              cat:'HR',           icon:'📊', color:'#e3b341', bg:'rgba(227,179,65,0.15)' },
+  { id:'goals',       name:'Goal Tracker',           desc:'OKRs and personal goals with progress',            cat:'HR',           icon:'🎯', color:'#bc8cff', bg:'rgba(188,140,255,0.15)' },
+
+  { id:'course',      name:'Interactive Course',     desc:'The core FRAP onboarding curriculum',               cat:'Education',    icon:'🎓', color:'#ffa657', bg:'rgba(255,166,87,0.15)' },
+  { id:'library',     name:"King Solomon's Library", desc:'Video and resource library for members',            cat:'Education',    icon:'📚', color:'#58a6ff', bg:'rgba(88,166,255,0.15)' },
+  { id:'tasks',       name:'Task Manager',           desc:'Action items from courses and meetings',            cat:'Education',    icon:'✅', color:'#3fb950', bg:'rgba(63,185,80,0.15)' },
+
+  { id:'avatar',      name:'Avatar Intelligence',    desc:'Deep insights on your ideal customer avatar',      cat:'Intelligence', icon:'🧠', color:'#bc8cff', bg:'rgba(188,140,255,0.15)' },
+  { id:'analytics',   name:'Analytics Dashboard',   desc:'Revenue, activity, and growth metrics',             cat:'Intelligence', icon:'📈', color:'#58a6ff', bg:'rgba(88,166,255,0.15)' },
+  { id:'territory',   name:'Territory Map',          desc:'Visualize your market territory geographically',    cat:'Intelligence', icon:'🗺️', color:'#39d353', bg:'rgba(57,211,83,0.15)' },
+  { id:'commission',  name:'Commission Report',      desc:'Real-time commission and earnings tracking',        cat:'Intelligence', icon:'💰', color:'#e3b341', bg:'rgba(227,179,65,0.15)' },
+
+  { id:'myaccount',   name:'My Account',             desc:'Profile, billing, and account settings',           cat:'Account',      icon:'👤', color:'#8b949e', bg:'rgba(139,148,158,0.15)' },
+  { id:'sherpa',      name:'My Sherpa Account',      desc:'Connect and manage your Sherpa profile',           cat:'Account',      icon:'🧭', color:'#ffa657', bg:'rgba(255,166,87,0.15)' },
+];
+
+const CAT_ORDER = ['Chapter','Marketing','CRM','HR','Education','Intelligence','Account'];
+const RECENT = ['dream20','socialmgr','roster','avatar','chatbot'];
+
+// ─── STATE ─────────────────────────────────────────────────────────────────
+let pinned = new Set(JSON.parse(localStorage.getItem('fp2') || '[]'));
+let activeTab = 'All';
+let currentPage = 'home';
+
+function save() { localStorage.setItem('fp2', JSON.stringify([...pinned])); }
+
+// ─── PAGE ROUTING ──────────────────────────────────────────────────────────
+function goPage(name) {
+  currentPage = name;
+
+  document.querySelectorAll('.page').forEach(p => p.classList.toggle('active', p.id === `page-${name}`));
+  document.getElementById('nav-home').classList.toggle('active', name === 'home');
+  document.getElementById('nav-features').classList.toggle('active', name === 'features');
+
+  if (name === 'features') {
+    renderTabs();
+    renderFeatures();
+    setTimeout(() => document.getElementById('featSearch').focus(), 60);
+  }
+}
+
+// ─── SIDEBAR PINNED ────────────────────────────────────────────────────────
+function renderSidebar() {
+  const el = document.getElementById('pinnedNav');
+  if (pinned.size === 0) {
+    el.innerHTML = `<div class="nav-empty">Star features on the<br>All Features page to pin here</div>`;
+    return;
+  }
+  el.innerHTML = [...pinned].map(id => {
+    const f = FEATURES.find(x => x.id === id);
+    if (!f) return '';
+    return `
+      <div class="nav-item" onclick="openFeature('${f.id}')">
+        <span class="ni-emoji">${f.icon}</span>
+        <span>${f.name}</span>
+        <button class="ni-remove" onclick="togglePin('${f.id}',event)" title="Unpin">×</button>
+      </div>`;
+  }).join('');
+}
+
+// ─── TABS ──────────────────────────────────────────────────────────────────
+function renderTabs() {
+  const query = document.getElementById('featSearch').value.trim().toLowerCase();
+  const cats = ['All', ...CAT_ORDER];
+  document.getElementById('featTabs').innerHTML = cats.map(cat => {
+    let count;
+    if (cat === 'All') {
+      count = query
+        ? FEATURES.filter(f => matches(f, query)).length
+        : FEATURES.length;
+    } else {
+      count = query
+        ? FEATURES.filter(f => f.cat === cat && matches(f, query)).length
+        : FEATURES.filter(f => f.cat === cat).length;
+    }
+    return `
+      <button class="tab-btn ${activeTab === cat ? 'active' : ''}" onclick="setTab('${cat}')">
+        ${cat} <span class="tab-count">${count}</span>
+      </button>`;
+  }).join('');
+}
+
+function setTab(cat) {
+  activeTab = cat;
+  renderTabs();
+  renderFeatures();
+  document.getElementById('featBody').scrollTop = 0;
+}
+
+// ─── SEARCH + RENDER ───────────────────────────────────────────────────────
+function matches(f, q) {
+  return f.name.toLowerCase().includes(q) ||
+         f.desc.toLowerCase().includes(q) ||
+         f.cat.toLowerCase().includes(q);
+}
+
+function hl(text, q) {
+  if (!q) return text;
+  const i = text.toLowerCase().indexOf(q.toLowerCase());
+  if (i === -1) return text;
+  return text.slice(0, i) + `<span class="hl">${text.slice(i, i+q.length)}</span>` + text.slice(i+q.length);
+}
+
+function renderFeatures() {
+  const q = document.getElementById('featSearch').value.trim().toLowerCase();
+  const body = document.getElementById('featBody');
+
+  let pool = FEATURES;
+  if (activeTab !== 'All') pool = pool.filter(f => f.cat === activeTab);
+  if (q) pool = pool.filter(f => matches(f, q));
+
+  // Update count badge
+  document.getElementById('searchCount').textContent = q
+    ? `${pool.length} result${pool.length !== 1 ? 's' : ''}`
+    : '';
+
+  // Re-render tabs to update counts
+  renderTabs();
+
+  if (pool.length === 0) {
+    body.innerHTML = `
+      <div class="no-results">
+        <div class="nr-emoji">🔍</div>
+        <p>No features match "<strong>${q}</strong>"</p>
+        <small style="display:block;margin-top:6px">Try a different keyword or clear the search</small>
+      </div>`;
+    return;
+  }
+
+  let html = '';
+
+  // Recent row — only on All tab with no query
+  if (!q && activeTab === 'All') {
+    const recentFeatures = RECENT.map(id => FEATURES.find(f => f.id === id)).filter(Boolean);
+    html += `
+      <div class="recent-section">
+        <div class="section-label">Recently Used</div>
+        <div class="recent-chips">
+          ${recentFeatures.map(f => `
+            <div class="recent-chip" onclick="openFeature('${f.id}')">
+              <span style="font-size:12px">${f.icon}</span>${f.name}
+            </div>`).join('')}
+        </div>
+      </div>`;
+  }
+
+  // Pinned section — only on All tab with no query, if any are pinned
+  if (!q && activeTab === 'All' && pinned.size > 0) {
+    const pf = [...pinned].map(id => FEATURES.find(f => f.id === id)).filter(Boolean);
+    html += `
+      <div class="cat-group">
+        <div class="cat-header">
+          <span class="cat-name">⭐ Pinned</span>
+          <span class="cat-line"></span>
+          <span class="cat-count">${pf.length}</span>
+        </div>
+        <div class="tile-grid">${pf.map(f => tile(f, q)).join('')}</div>
+      </div>`;
+  }
+
+  // Category groups
+  const grouped = {};
+  pool.forEach(f => { (grouped[f.cat] = grouped[f.cat] || []).push(f); });
+  const sortedCats = Object.keys(grouped).sort((a, b) => {
+    const ai = CAT_ORDER.indexOf(a), bi = CAT_ORDER.indexOf(b);
+    return (ai < 0 ? 99 : ai) - (bi < 0 ? 99 : bi);
+  });
+
+  sortedCats.forEach(cat => {
+    const list = grouped[cat];
+    html += `
+      <div class="cat-group">
+        <div class="cat-header">
+          <span class="cat-name">${cat}</span>
+          <span class="cat-line"></span>
+          <span class="cat-count">${list.length}</span>
+        </div>
+        <div class="tile-grid">${list.map(f => tile(f, q)).join('')}</div>
+      </div>`;
+  });
+
+  body.innerHTML = html;
+}
+
+function tile(f, q) {
+  const on = pinned.has(f.id);
+  const starSvg = on
+    ? `<svg viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`
+    : `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>`;
+  return `
+    <div class="tile ${on ? 'pinned' : ''}" onclick="openFeature('${f.id}')">
+      <div class="tile-row">
+        <div class="tile-icon" style="background:${f.bg};color:${f.color}">${f.icon}</div>
+        <button class="tile-star ${on ? 'on' : ''}"
+          onclick="togglePin('${f.id}',event)"
+          title="${on ? 'Unpin' : 'Pin to sidebar'}"
+          aria-label="${on ? 'Unpin' : 'Pin to sidebar'}"
+        >${starSvg}</button>
+      </div>
+      <div>
+        <div class="tile-name">${hl(f.name, q)}</div>
+        <div class="tile-desc">${hl(f.desc, q)}</div>
+      </div>
+    </div>`;
+}
+
+// ─── ACTIONS ───────────────────────────────────────────────────────────────
+function togglePin(id, e) {
+  e.stopPropagation();
+  if (pinned.has(id)) {
+    pinned.delete(id);
+    toast('Removed from sidebar');
+  } else {
+    pinned.add(id);
+    toast('Pinned to sidebar ⭐');
+  }
+  save();
+  renderSidebar();
+  if (currentPage === 'features') renderFeatures();
+}
+
+function openFeature(id) {
+  const f = FEATURES.find(x => x.id === id);
+  // Update recent
+  const i = RECENT.indexOf(id);
+  if (i > -1) RECENT.splice(i, 1);
+  RECENT.unshift(id);
+  if (RECENT.length > 8) RECENT.pop();
+  toast(`Opening ${f.name}…`);
+}
+
+// ─── TOAST ─────────────────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+// ─── KEYBOARD ──────────────────────────────────────────────────────────────
+document.addEventListener('keydown', e => {
+  if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+    e.preventDefault();
+    goPage(currentPage === 'features' ? 'home' : 'features');
+  }
+});
+
+// ─── INIT ──────────────────────────────────────────────────────────────────
+renderSidebar();
+</script>
+</body>
+</html>

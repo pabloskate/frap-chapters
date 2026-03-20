@@ -9,6 +9,7 @@ import { ManagePage } from './pages/ManagePage';
 import { NationwideWinsPage } from './pages/NationwideWinsPage';
 import { OnboardingImplementationPage } from './pages/OnboardingImplementationPage';
 import { OnboardingPage } from './pages/OnboardingPage';
+import { AllFeaturesPage } from './pages/AllFeaturesPage';
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
       <Route path="/manage" element={<ManagePage />} />
       <Route path="/insights" element={<InsightsPage />} />
       <Route path="/generator" element={<GeneratorPage />} />
+      <Route path="/features" element={<AllFeaturesPage />} />
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );

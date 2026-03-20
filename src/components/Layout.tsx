@@ -1,7 +1,10 @@
-import { useCallback, useEffect, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import type { NavVariant, SidebarKey } from '../types';
+import { LayoutNavProvider } from '../context/LayoutNavContext';
+import { getFeatureById } from '../data/featureCatalog';
+import { usePinnedFeatures } from '../state/PinnedFeatures';
 import { useAppState } from '../state/AppState';
+import type { NavVariant, SidebarKey } from '../types';
 import { ChatPanel } from './ChatPanel';
 
 interface LayoutProps {
@@ -66,6 +69,13 @@ export function AppLayout({
   const [chatOpen, setChatOpen] = useState(false);
   const location = useLocation();
   const navItems = getNavItems(navVariant);
+  const { pinnedIds, removePin } = usePinnedFeatures();
+
+  const openChat = () => {
+    if (onboardingComplete) {
+      setChatOpen(true);
+    }
+  };
 
   useEffect(() => {
     document.title = title;
@@ -107,7 +117,8 @@ export function AppLayout({
   }, [mobileNavOpen]);
 
   return (
-    <div className="app-container">
+    <LayoutNavProvider openChat={openChat}>
+      <div className="app-container">
       <header className="mobile-nav-bar">
         <button
           aria-controls="app-sidebar"
@@ -142,7 +153,7 @@ export function AppLayout({
         id="app-sidebar"
       >
         <h2 className="sidebar-title">Profit Academy</h2>
-        <nav className="sidebar-menu">
+        <nav className="sidebar-menu" aria-label="Main navigation">
           <Link
             className={`sidebar-item ${activeNav === 'home' ? 'active' : ''}`}
             to="/"
@@ -290,14 +301,109 @@ export function AppLayout({
               )}
             </div>
           </div>
+
+          <div className="sidebar-pinned-block">
+            <div className="sidebar-section-label">Pinned</div>
+            {pinnedIds.length === 0 ? (
+              <p className="sidebar-pinned-empty">
+                Star items on{' '}
+                <Link className="sidebar-pinned-empty-link" to="/features">
+                  All Features
+                </Link>{' '}
+                to pin them here.
+              </p>
+            ) : (
+              <ul className="sidebar-pinned-list">
+                {pinnedIds.map((id) => {
+                  const feature = getFeatureById(id);
+                  if (!feature) {
+                    return null;
+                  }
+
+                  const isChat = feature.navKind === 'chat';
+                  const path = feature.href ?? '';
+                  const pathActive =
+                    !isChat &&
+                    (path === '/'
+                      ? location.pathname === '/'
+                      : location.pathname === path);
+
+                  const isActive = isChat ? chatOpen : pathActive;
+
+                  return (
+                    <li className="sidebar-pin-row" key={id}>
+                      {isChat ? (
+                        <button
+                          className={`sidebar-subitem sidebar-pin-target${
+                            isActive ? ' active' : ''
+                          }`}
+                          type="button"
+                          onClick={() => {
+                            if (onboardingComplete) {
+                              setChatOpen((open) => !open);
+                            }
+
+                            setMobileNavOpen(false);
+                          }}
+                        >
+                          <span>{feature.label}</span>
+                        </button>
+                      ) : (
+                        <Link
+                          className={`sidebar-subitem sidebar-pin-target${
+                            isActive ? ' active' : ''
+                          }`}
+                          to={path}
+                          onClick={() => setMobileNavOpen(false)}
+                        >
+                          <span>{feature.label}</span>
+                        </Link>
+                      )}
+                      <button
+                        type="button"
+                        className="sidebar-pin-remove"
+                        aria-label={`Unpin ${feature.label}`}
+                        onClick={() => removePin(id)}
+                      >
+                        ×
+                      </button>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </div>
         </nav>
+
+        <div className="sidebar-footer">
+          <Link
+            className={`sidebar-item sidebar-footer-link${
+              activeNav === 'allFeatures' ? ' active' : ''
+            }`}
+            to="/features"
+            onClick={() => setMobileNavOpen(false)}
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+              <rect x="3" y="3" width="7" height="7" rx="1" />
+              <rect x="14" y="3" width="7" height="7" rx="1" />
+              <rect x="3" y="14" width="7" height="7" rx="1" />
+              <rect x="14" y="14" width="7" height="7" rx="1" />
+            </svg>
+            <span>All Features</span>
+          </Link>
+        </div>
       </aside>
 
       <main className="main-content">{children}</main>
 
       {onboardingComplete && (
-        <ChatPanel isOpen={chatOpen} onClose={() => setChatOpen(false)} />
+        <ChatPanel
+          isOpen={chatOpen}
+          onClose={() => setChatOpen(false)}
+          onNewMessage={() => {}}
+        />
       )}
-    </div>
+      </div>
+    </LayoutNavProvider>
   );
 }
