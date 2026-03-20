@@ -1,0 +1,409 @@
+{
+  "members": [
+    {
+      "name": "Mike Johnson",
+      "business": "Johnson Plumbing Co",
+      "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"
+    },
+    {
+      "name": "Sarah Miller",
+      "business": "Miller HVAC Solutions",
+      "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face",
+      "reverseSwapIcon": true
+    },
+    {
+      "name": "Carlos Ramirez",
+      "business": "Ramirez Roofing Group",
+      "photo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face"
+    },
+    {
+      "name": "James Carter",
+      "business": "Carter Electric",
+      "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face",
+      "reverseSwapIcon": true
+    },
+    {
+      "name": "Lisa Nguyen",
+      "business": "PureClean Services",
+      "photo": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face"
+    },
+    {
+      "name": "Robert Allen",
+      "business": "Allen Lawn & Landscape",
+      "photo": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=80&h=80&fit=crop&crop=face"
+    }
+  ],
+  "memberScores": {
+    "Mike Johnson": {
+      "Sarah Miller": { "score": 88, "factors": ["Same zip", "Homeowner market"], "suggestedType": "email" },
+      "Carlos Ramirez": { "score": 71, "factors": ["Same zip", "Home improvement"], "suggestedType": "facebook-group" },
+      "James Carter": { "score": 90, "factors": ["Homeowner", "Same zip", "Service biz"], "suggestedType": "thankyou" },
+      "Lisa Nguyen": { "score": 85, "factors": ["Homeowner", "Same zip", "Premium market"], "suggestedType": "email" },
+      "Robert Allen": { "score": 80, "factors": ["Homeowner", "Same zip"], "suggestedType": "social" }
+    },
+    "Sarah Miller": {
+      "Mike Johnson": { "score": 88, "factors": ["Same zip", "Homeowner market"], "suggestedType": "email" },
+      "Carlos Ramirez": { "score": 68, "factors": ["Same zip"], "suggestedType": "newsletter" },
+      "James Carter": { "score": 86, "factors": ["Homeowner", "Same zip", "Service biz"], "suggestedType": "interview" },
+      "Lisa Nguyen": { "score": 91, "factors": ["Homeowner", "Seasonal sync", "Premium"], "suggestedType": "interview" },
+      "Robert Allen": { "score": 77, "factors": ["Homeowner", "Seasonal sync"], "suggestedType": "newsletter" }
+    },
+    "Carlos Ramirez": {
+      "Mike Johnson": { "score": 71, "factors": ["Same zip", "Home improvement"], "suggestedType": "facebook-group" },
+      "Sarah Miller": { "score": 68, "factors": ["Same zip"], "suggestedType": "newsletter" },
+      "James Carter": { "score": 74, "factors": ["Same zip", "Home improvement"], "suggestedType": "social" },
+      "Lisa Nguyen": { "score": 65, "factors": ["Same zip"], "suggestedType": "newsletter" },
+      "Robert Allen": { "score": 70, "factors": ["Same zip", "Home improvement"], "suggestedType": "mail" }
+    },
+    "James Carter": {
+      "Mike Johnson": { "score": 90, "factors": ["Homeowner", "Same zip", "Service biz"], "suggestedType": "thankyou" },
+      "Sarah Miller": { "score": 86, "factors": ["Homeowner", "Same zip", "Service biz"], "suggestedType": "interview" },
+      "Carlos Ramirez": { "score": 74, "factors": ["Same zip", "Home improvement"], "suggestedType": "social" },
+      "Lisa Nguyen": { "score": 88, "factors": ["Homeowner", "Premium market", "Same zip"], "suggestedType": "email" },
+      "Robert Allen": { "score": 82, "factors": ["Homeowner", "Same zip"], "suggestedType": "social" }
+    },
+    "Lisa Nguyen": {
+      "Mike Johnson": { "score": 85, "factors": ["Homeowner", "Same zip", "Premium market"], "suggestedType": "email" },
+      "Sarah Miller": { "score": 91, "factors": ["Homeowner", "Seasonal sync", "Premium"], "suggestedType": "interview" },
+      "Carlos Ramirez": { "score": 65, "factors": ["Same zip"], "suggestedType": "newsletter" },
+      "James Carter": { "score": 88, "factors": ["Homeowner", "Premium market", "Same zip"], "suggestedType": "email" },
+      "Robert Allen": { "score": 79, "factors": ["Homeowner", "Same zip"], "suggestedType": "social" }
+    },
+    "Robert Allen": {
+      "Mike Johnson": { "score": 80, "factors": ["Homeowner", "Same zip"], "suggestedType": "social" },
+      "Sarah Miller": { "score": 77, "factors": ["Homeowner", "Seasonal sync"], "suggestedType": "newsletter" },
+      "Carlos Ramirez": { "score": 70, "factors": ["Same zip", "Home improvement"], "suggestedType": "mail" },
+      "James Carter": { "score": 82, "factors": ["Homeowner", "Same zip"], "suggestedType": "social" },
+      "Lisa Nguyen": { "score": 79, "factors": ["Homeowner", "Same zip"], "suggestedType": "social" }
+    }
+  },
+  "suggestedPairings": [
+    {
+      "from": "Sarah Miller",
+      "fromBiz": "Miller HVAC Solutions",
+      "to": "Lisa Nguyen",
+      "toBiz": "PureClean Services",
+      "type": "interview",
+      "score": 91,
+      "reason": "Homeowner market + seasonal service sync"
+    },
+    {
+      "from": "James Carter",
+      "fromBiz": "Carter Electric",
+      "to": "Mike Johnson",
+      "toBiz": "Johnson Plumbing Co",
+      "type": "thankyou",
+      "score": 90,
+      "reason": "Same zip + complementary home services"
+    },
+    {
+      "from": "Lisa Nguyen",
+      "fromBiz": "PureClean Services",
+      "to": "James Carter",
+      "toBiz": "Carter Electric",
+      "type": "email",
+      "score": 88,
+      "reason": "Premium homeowners + service business overlap"
+    },
+    {
+      "from": "Robert Allen",
+      "fromBiz": "Allen Lawn & Landscape",
+      "to": "James Carter",
+      "toBiz": "Carter Electric",
+      "type": "social",
+      "score": 82,
+      "reason": "Homeowners + spring/summer work bundling"
+    },
+    {
+      "from": "Mike Johnson",
+      "fromBiz": "Johnson Plumbing Co",
+      "to": "Sarah Miller",
+      "toBiz": "Miller HVAC Solutions",
+      "type": "email",
+      "score": 88,
+      "reason": "Same zip + homeowner service market"
+    },
+    {
+      "from": "Carlos Ramirez",
+      "fromBiz": "Ramirez Roofing Group",
+      "to": "James Carter",
+      "toBiz": "Carter Electric",
+      "type": "facebook-group",
+      "score": 74,
+      "reason": "Same zip + home improvement bundling"
+    }
+  ],
+  "defaultSwaps": [
+    {
+      "id": "s1",
+      "from": "Lisa Nguyen",
+      "fromBiz": "PureClean Services",
+      "to": "Mike Johnson",
+      "toBiz": "Johnson Plumbing Co",
+      "type": "email",
+      "status": "assigned",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 0
+    },
+    {
+      "id": "s2",
+      "from": "Mike Johnson",
+      "fromBiz": "Johnson Plumbing Co",
+      "to": "Sarah Miller",
+      "toBiz": "Miller HVAC Solutions",
+      "type": "social",
+      "status": "assigned",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 1
+    },
+    {
+      "id": "s6",
+      "from": "Carlos Ramirez",
+      "fromBiz": "Ramirez Roofing Group",
+      "to": "Sarah Miller",
+      "toBiz": "Miller HVAC Solutions",
+      "type": "email",
+      "status": "assigned",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 2
+    },
+    {
+      "id": "s7",
+      "from": "Lisa Nguyen",
+      "fromBiz": "PureClean Services",
+      "to": "Robert Allen",
+      "toBiz": "Allen Lawn & Landscape",
+      "type": "interview",
+      "status": "assigned",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 3
+    },
+    {
+      "id": "s3",
+      "from": "Sarah Miller",
+      "fromBiz": "Miller HVAC Solutions",
+      "to": "Robert Allen",
+      "toBiz": "Allen Lawn & Landscape",
+      "type": "email",
+      "status": "in-progress",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 0
+    },
+    {
+      "id": "s4",
+      "from": "Robert Allen",
+      "fromBiz": "Allen Lawn & Landscape",
+      "to": "James Carter",
+      "toBiz": "Carter Electric",
+      "type": "newsletter",
+      "status": "in-progress",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 1
+    },
+    {
+      "id": "s5",
+      "from": "James Carter",
+      "fromBiz": "Carter Electric",
+      "to": "Lisa Nguyen",
+      "toBiz": "PureClean Services",
+      "type": "social",
+      "status": "done",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 0
+    },
+    {
+      "id": "s8",
+      "from": "Mike Johnson",
+      "fromBiz": "Johnson Plumbing Co",
+      "to": "Carlos Ramirez",
+      "toBiz": "Ramirez Roofing Group",
+      "type": "thankyou",
+      "status": "done",
+      "month": 2,
+      "year": 2026,
+      "boardOrder": 1
+    }
+  ],
+  "partnerData": {
+    "Johnson Plumbing Co": {
+      "contact": "Mike Johnson",
+      "phone": "(555) 123-4567",
+      "email": "mike@johnsonplumbing.com",
+      "website": "www.johnsonplumbing.com",
+      "services": "Residential plumbing, emergency repairs, water heater installation"
+    },
+    "Miller HVAC Solutions": {
+      "contact": "Sarah Miller",
+      "phone": "(555) 234-5678",
+      "email": "sarah@millerhvac.com",
+      "website": "www.millerhvac.com",
+      "services": "HVAC installation, repair, and maintenance"
+    },
+    "Ramirez Roofing Group": {
+      "contact": "Carlos Ramirez",
+      "phone": "(555) 345-6789",
+      "email": "info@ramirezroofing.com",
+      "website": "www.ramirezroofing.com",
+      "services": "Roof repair, replacement, and inspections"
+    },
+    "Carter Electric": {
+      "contact": "James Carter",
+      "phone": "(555) 456-7890",
+      "email": "james@cartelectric.com",
+      "website": "www.cartelectric.com",
+      "services": "Electrical installation, repair, and upgrades"
+    },
+    "PureClean Services": {
+      "contact": "Lisa Nguyen",
+      "phone": "(555) 567-8901",
+      "email": "lisa@pureclean.com",
+      "website": "www.pureclean.com",
+      "services": "Deep home cleaning, premium cleaning services"
+    },
+    "Allen Lawn & Landscape": {
+      "contact": "Robert Allen",
+      "phone": "(555) 678-9012",
+      "email": "robert@allenlandscape.com",
+      "website": "www.allenlandscape.com",
+      "services": "High-end landscape design and maintenance"
+    }
+  },
+  "chatMessagesSeed": [
+    {
+      "author": "Mike Johnson",
+      "time": "10:30 AM",
+      "text": "Hey everyone! Just wanted to share that we're running a special on water heater installations this month. Perfect timing for the colder weather coming up!",
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=80&h=80&fit=crop&crop=face"
+    },
+    {
+      "author": "Sarah Miller",
+      "time": "10:32 AM",
+      "text": "That's great Mike! We should coordinate - I'm offering HVAC tune-ups and could mention your water heater services. Win-win!",
+      "avatar": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=80&h=80&fit=crop&crop=face"
+    },
+    {
+      "author": "You",
+      "time": "10:35 AM",
+      "text": "Love the collaboration! Anyone interested in a joint promotion for home services? Could bundle plumbing + HVAC + cleaning.",
+      "avatar": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=80&h=80&fit=crop&crop=face",
+      "own": true
+    },
+    {
+      "author": "Carlos Ramirez",
+      "time": "10:38 AM",
+      "text": "Count me in! I can add roof inspections to the bundle. Great way to help homeowners prepare for winter.",
+      "avatar": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=80&h=80&fit=crop&crop=face"
+    },
+    {
+      "author": "James Carter",
+      "time": "10:42 AM",
+      "text": "Happy Friday everyone! Quick question - has anyone worked with the new real estate agency downtown? Looking for referral partners.",
+      "avatar": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=80&h=80&fit=crop&crop=face"
+    }
+  ],
+  "insightCards": [
+    {
+      "name": "Mike Johnson",
+      "business": "Johnson Plumbing Co",
+      "photo": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=120&h=120&fit=crop&crop=face",
+      "score": "92%",
+      "scoreLabel": "Match",
+      "factors": [
+        { "label": "Homeowner", "match": true },
+        { "label": "Same zip", "match": true },
+        { "label": "Service biz", "match": true }
+      ],
+      "actions": [
+        { "label": "Email Swap", "type": "email", "primary": true },
+        { "label": "Thank You Page", "type": "thankyou" }
+      ]
+    },
+    {
+      "name": "Sarah Miller",
+      "business": "Miller HVAC Solutions",
+      "photo": "https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=120&h=120&fit=crop&crop=face",
+      "score": "89%",
+      "scoreLabel": "Match",
+      "factors": [
+        { "label": "Homeowner", "match": true },
+        { "label": "Seasonal sync", "match": true },
+        { "label": "Same zip", "match": true }
+      ],
+      "actions": [
+        { "label": "Interview Swap", "type": "interview", "primary": true },
+        { "label": "Newsletter", "type": "newsletter" }
+      ]
+    },
+    {
+      "name": "Lisa Nguyen",
+      "business": "PureClean Services",
+      "photo": "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=120&h=120&fit=crop&crop=face",
+      "score": "94%",
+      "scoreLabel": "Best",
+      "factors": [
+        { "label": "Homeowner", "match": true },
+        { "label": "Same zip", "match": true },
+        { "label": "Premium market", "match": true }
+      ],
+      "actions": [
+        { "label": "Email Swap", "type": "email", "primary": true },
+        { "label": "Social Shoutout", "type": "social" }
+      ]
+    },
+    {
+      "name": "Carlos Ramirez",
+      "business": "Ramirez Roofing Group",
+      "photo": "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=120&h=120&fit=crop&crop=face",
+      "score": "67%",
+      "scoreLabel": "Medium",
+      "medium": true,
+      "factors": [
+        { "label": "Same zip", "match": true },
+        { "label": "Commercial focus", "warning": true }
+      ],
+      "actions": [
+        { "label": "Newsletter", "type": "newsletter" },
+        { "label": "Facebook Group", "type": "facebook-group" }
+      ]
+    },
+    {
+      "name": "James Carter",
+      "business": "Carter Electric",
+      "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=120&h=120&fit=crop&crop=face",
+      "score": "85%",
+      "scoreLabel": "Match",
+      "factors": [
+        { "label": "Homeowner", "match": true },
+        { "label": "Same zip", "match": true },
+        { "label": "Service biz", "match": true }
+      ],
+      "actions": [
+        { "label": "Interview Swap", "type": "interview", "primary": true },
+        { "label": "Direct Mail", "type": "mail" }
+      ]
+    },
+    {
+      "name": "Robert Allen",
+      "business": "Allen Lawn & Landscape",
+      "photo": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=120&h=120&fit=crop&crop=face",
+      "score": "78%",
+      "scoreLabel": "Good",
+      "factors": [
+        { "label": "Homeowner", "match": true },
+        { "label": "Same zip", "match": true },
+        { "label": "Spring/fall focus" }
+      ],
+      "actions": [
+        { "label": "Newsletter", "type": "newsletter" },
+        { "label": "Social Shoutout", "type": "social" }
+      ]
+    }
+  ]
+}
