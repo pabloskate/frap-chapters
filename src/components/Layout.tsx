@@ -69,7 +69,7 @@ export function AppLayout({
   const [chatOpen, setChatOpen] = useState(false);
   const location = useLocation();
   const navItems = getNavItems(navVariant);
-  const { pinnedIds, removePin } = usePinnedFeatures();
+  const { sidebarIds, unpinFeature } = usePinnedFeatures();
 
   const openChat = () => {
     if (onboardingComplete) {
@@ -304,7 +304,7 @@ export function AppLayout({
 
           <div className="sidebar-pinned-block">
             <div className="sidebar-section-label">Pinned</div>
-            {pinnedIds.length === 0 ? (
+            {sidebarIds.length === 0 ? (
               <p className="sidebar-pinned-empty">
                 Star items on{' '}
                 <Link className="sidebar-pinned-empty-link" to="/features">
@@ -314,7 +314,7 @@ export function AppLayout({
               </p>
             ) : (
               <ul className="sidebar-pinned-list">
-                {pinnedIds.map((id) => {
+                {sidebarIds.map((id) => {
                   const feature = getFeatureById(id);
                   if (!feature) {
                     return null;
@@ -363,7 +363,7 @@ export function AppLayout({
                         type="button"
                         className="sidebar-pin-remove"
                         aria-label={`Unpin ${feature.label}`}
-                        onClick={() => removePin(id)}
+                        onClick={() => unpinFeature(id)}
                       >
                         ×
                       </button>

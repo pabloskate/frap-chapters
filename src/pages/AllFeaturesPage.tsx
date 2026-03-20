@@ -1,4 +1,4 @@
-import { useMemo, useState, type ReactNode } from 'react';
+import { useMemo, useState, useRef, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/Layout';
 import { useLayoutNav } from '../context/LayoutNavContext';
@@ -7,7 +7,7 @@ import {
   FEATURE_CATEGORY_ORDER,
   type FeatureCategory,
 } from '../data/featureCatalog';
-import { usePinnedFeatures } from '../state/PinnedFeatures';
+import { usePinnedFeatures, type PinLocation } from '../state/PinnedFeatures';
 
 type TabKey = 'All' | FeatureCategory;
 
@@ -40,12 +40,131 @@ function matchesSearch(
   };
 }
 
+interface PinDropdownProps {
+  featureId: string;
+  currentLocation: PinLocation | null;
+  onPin: (location: PinLocation) => void;
+  onUnpin: () => void;
+  isOpen: boolean;
+  onClose: () => void;
+  triggerRef: React.RefObject<HTMLButtonElement | null>;
+}
+
+function PinDropdown({
+  currentLocation,
+  onPin,
+  onUnpin,
+  isOpen,
+  onClose,
+  triggerRef,
+}: PinDropdownProps) {
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0, above: false });
+
+  useEffect(() => {
+    if (!isOpen || !triggerRef.current) return;
+
+    // Calculate position based on trigger button
+    const rect = triggerRef.current.getBoundingClientRect();
+    const dropdownHeight = 120; // Approximate height of dropdown
+    const gap = 6;
+
+    // Check if dropdown would go off-screen below
+    const wouldGoOffScreenBelow = rect.bottom + dropdownHeight + gap > window.innerHeight;
+
+    setPosition({
+      top: wouldGoOffScreenBelow ? rect.top - dropdownHeight - gap : rect.bottom + gap,
+      left: rect.right - 160, // Align right edge of dropdown with right edge of button
+      above: wouldGoOffScreenBelow,
+    });
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        !triggerRef.current?.contains(event.target as Node)
+      ) {
+        onClose();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [isOpen, onClose, triggerRef]);
+
+  if (!isOpen) return null;
+
+  const isPinnedToSidebar = currentLocation === 'sidebar';
+  const isPinnedToHomepage = currentLocation === 'homepage';
+
+  return (
+    <div
+      ref={dropdownRef}
+      className={`pin-dropdown ${position.above ? 'pin-dropdown--above' : ''}`}
+      style={{ top: position.top, left: position.left }}
+    >
+      <div className="pin-dropdown-arrow" />
+      <div className="pin-dropdown-header">Pin to:</div>
+      <button
+        type="button"
+        className={`pin-dropdown-option ${isPinnedToSidebar ? 'is-active' : ''}`}
+        onClick={() => {
+          if (isPinnedToSidebar) {
+            onUnpin();
+          } else {
+            onPin('sidebar');
+          }
+          onClose();
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+          <rect x="3" y="3" width="7" height="7" rx="1" />
+          <rect x="14" y="3" width="7" height="7" rx="1" />
+          <rect x="3" y="14" width="7" height="7" rx="1" />
+          <rect x="14" y="14" width="7" height="7" rx="1" />
+        </svg>
+        <span>Sidebar</span>
+        {isPinnedToSidebar && (
+          <svg className="pin-dropdown-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </button>
+      <button
+        type="button"
+        className={`pin-dropdown-option ${isPinnedToHomepage ? 'is-active' : ''}`}
+        onClick={() => {
+          if (isPinnedToHomepage) {
+            onUnpin();
+          } else {
+            onPin('homepage');
+          }
+          onClose();
+        }}
+      >
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16">
+          <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+          <polyline points="9 22 9 12 15 12 15 22" />
+        </svg>
+        <span>Homepage</span>
+        {isPinnedToHomepage && (
+          <svg className="pin-dropdown-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+        )}
+      </button>
+    </div>
+  );
+}
+
 function AllFeaturesContent() {
   const navigate = useNavigate();
   const { openChat } = useLayoutNav();
-  const { togglePin, isPinned } = usePinnedFeatures();
+  const { pinFeature, unpinFeature, getPinLocation } = usePinnedFeatures();
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<TabKey>('All');
+  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const pinButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -123,6 +242,11 @@ function AllFeaturesContent() {
     if (entry.href) {
       navigate(entry.href);
     }
+  };
+
+  const handlePinClick = (e: React.MouseEvent, featureId: string) => {
+    e.stopPropagation();
+    setOpenDropdownId(openDropdownId === featureId ? null : featureId);
   };
 
   return (
@@ -208,14 +332,15 @@ function AllFeaturesContent() {
                 </div>
                 <ul className="all-features-grid">
                   {items.map((entry) => {
-                    const pinned = isPinned(entry.id);
+                    const location = getPinLocation(entry.id);
+                    const isPinnedAnywhere = location !== null;
                     const titleMatch = matchesSearch(entry.label, query);
                     const descMatch = matchesSearch(entry.description, query);
 
                     return (
                       <li key={entry.id}>
                         <div
-                          className={`all-features-tile${pinned ? ' is-pinned' : ''}`}
+                          className={`all-features-tile${isPinnedAnywhere ? ' is-pinned' : ''}`}
                         >
                           <button
                             type="button"
@@ -229,40 +354,57 @@ function AllFeaturesContent() {
                               {descMatch.highlight ?? entry.description}
                             </span>
                           </button>
-                          <button
-                            type="button"
-                            className={`all-features-pin${pinned ? ' is-pinned' : ''}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              togglePin(entry.id);
-                            }}
-                            aria-pressed={pinned}
-                            aria-label={
-                              pinned ? 'Remove from pinned' : 'Pin to sidebar'
-                            }
-                            title={pinned ? 'Unpin' : 'Pin to sidebar'}
-                          >
-                            <svg
-                              viewBox="0 0 24 24"
-                              width="16"
-                              height="16"
-                              aria-hidden
+                          <div className="all-features-pin-wrap">
+                            <button
+                              type="button"
+                              ref={(el) => {
+                                if (el) {
+                                  pinButtonRefs.current.set(entry.id, el);
+                                }
+                              }}
+                              className={`all-features-pin${isPinnedAnywhere ? ' is-pinned' : ''}`}
+                              onClick={(e) => handlePinClick(e, entry.id)}
+                              aria-pressed={isPinnedAnywhere}
+                              aria-label={
+                                isPinnedAnywhere
+                                  ? `Pinned to ${location}. Click to change`
+                                  : 'Pin feature'
+                              }
+                              title={isPinnedAnywhere ? `Pinned to ${location}` : 'Pin feature'}
                             >
-                              {pinned ? (
-                                <path
-                                  fill="currentColor"
-                                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                                />
-                              ) : (
-                                <path
-                                  fill="none"
-                                  stroke="currentColor"
-                                  strokeWidth="2"
-                                  d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
-                                />
-                              )}
-                            </svg>
-                          </button>
+                              <svg
+                                viewBox="0 0 24 24"
+                                width="16"
+                                height="16"
+                                aria-hidden
+                              >
+                                {isPinnedAnywhere ? (
+                                  <path
+                                    fill="currentColor"
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                  />
+                                ) : (
+                                  <path
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"
+                                  />
+                                )}
+                              </svg>
+                            </button>
+                            <PinDropdown
+                              featureId={entry.id}
+                              currentLocation={location}
+                              onPin={(loc) => pinFeature(entry.id, loc)}
+                              onUnpin={() => unpinFeature(entry.id)}
+                              isOpen={openDropdownId === entry.id}
+                              onClose={() => setOpenDropdownId(null)}
+                              triggerRef={{
+                                current: pinButtonRefs.current.get(entry.id) ?? null,
+                              }}
+                            />
+                          </div>
                         </div>
                       </li>
                     );

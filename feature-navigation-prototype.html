@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feature Hub Prototype</title>
+<style>
+  /* Dark theme based on your screenshots */
+  :root {
+    --bg-dark: #121418;
+    --bg-panel: #1e2126;
+    --bg-hover: #2a2d35;
+    --text-main: #ffffff;
+    --text-muted: #9ca3af;
+    --accent: #f59e0b; /* Amber/Orange */
+    --border: #374151;
+  }
+  
+  * { box-sizing: border-box; }
+  
+  body {
+    margin: 0; 
+    font-family: system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-dark); 
+    color: var(--text-main);
+    display: flex; 
+    height: 100vh; 
+    overflow: hidden;
+  }
+
+  /* --- Sidebar --- */
+  .sidebar {
+    width: 260px; 
+    background-color: var(--bg-panel);
+    border-right: 1px solid var(--border);
+    display: flex; 
+    flex-direction: column; 
+    padding: 1.5rem 0;
+  }
+  .sidebar-section { 
+    padding: 0 1.5rem; 
+    margin-bottom: 2rem; 
+  }
+  .sidebar-title {
+    font-size: 0.75rem; 
+    text-transform: uppercase; 
+    letter-spacing: 0.05em;
+    color: var(--text-muted); 
+    margin-bottom: 0.75rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .nav-item {
+    display: flex; 
+    align-items: center; 
+    gap: 0.75rem;
+    padding: 0.5rem 0.75rem; 
+    margin: 0 -0.75rem 0.25rem;
+    border-radius: 0.375rem; 
+    cursor: pointer; 
+    color: var(--text-main);
+    text-decoration: none; 
+    font-size: 0.9rem;
+    transition: background 0.2s;
+  }
+  .nav-item:hover { 
+    background-color: var(--bg-hover); 
+  }
+  .nav-item.active { 
+    background-color: rgba(245, 158, 11, 0.1); 
+    color: var(--accent); 
+  }
+  .nav-icon {
+    opacity: 0.7;
+  }
+
+  /* --- Main Content --- */
+  .main { 
+    flex: 1; 
+    display: flex; 
+    flex-direction: column; 
+    overflow-y: auto; 
+  }
+  .header {
+    padding: 2rem 3rem 1rem; 
+    position: sticky; 
+    top: 0;
+    background: linear-gradient(to bottom, var(--bg-dark) 85%, transparent);
+    z-index: 10;
+  }
+  .header h1 {
+    margin: 0 0 0.5rem 0;
+    font-size: 1.75rem;
+  }
+  .search-container { 
+    position: relative; 
+    max-width: 600px; 
+    margin-top: 1.5rem; 
+  }
+  .search-input {
+    width: 100%; 
+    padding: 1rem 1rem 1rem 3rem;
+    background-color: var(--bg-panel); 
+    border: 1px solid var(--border);
+    border-radius: 0.5rem; 
+    color: var(--text-main); 
+    font-size: 1rem;
+    outline: none; 
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+  .search-input:focus { 
+    border-color: var(--accent); 
+    box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+  }
+  .search-icon {
+    position: absolute; 
+    left: 1rem; 
+    top: 50%; 
+    transform: translateY(-50%);
+    color: var(--text-muted);
+  }
+  .shortcut-hint {
+    position: absolute;
+    right: 1rem;
+    top: 50%;
+    transform: translateY(-50%);
+    background: var(--bg-dark);
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    border: 1px solid var(--border);
+  }
+
+  /* --- Grid & Cards --- */
+  .content { 
+    padding: 0 3rem 3rem; 
+  }
+  .category-title {
+    font-size: 1.1rem; 
+    margin: 2.5rem 0 1rem; 
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border); 
+    padding-bottom: 0.5rem;
+    font-weight: 500;
+  }
+  .grid {
+    display: grid; 
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+    gap: 1rem;
+  }
+  .card {
+    background-color: var(--bg-panel); 
+    border: 1px solid var(--border);
+    border-radius: 0.5rem; 
+    padding: 1.25rem; 
+    cursor: pointer;
+    transition: transform 0.2s, border-color 0.2s;
+    display: flex; 
+    flex-direction: column; 
+    gap: 0.5rem;
+    position: relative;
+  }
+  .card:hover { 
+    transform: translateY(-2px); 
+    border-color: var(--accent); 
+  }
+  .card-header { 
+    display: flex; 
+    justify-content: space-between; 
+    align-items: flex-start; 
+  }
+  .card-title { 
+    font-weight: 600; 
+    font-size: 1rem; 
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+  .card-desc { 
+    font-size: 0.85rem; 
+    color: var(--text-muted); 
+    line-height: 1.5; 
+  }
+  .pin-btn {
+    background: none; 
+    border: none; 
+    color: var(--text-muted); 
+    cursor: pointer;
+    padding: 0.25rem; 
+    border-radius: 0.25rem;
+    opacity: 0;
+    transition: opacity 0.2s, color 0.2s;
+  }
+  .card:hover .pin-btn {
+    opacity: 1;
+  }
+  .pin-btn:hover { 
+    color: var(--accent); 
+    background-color: var(--bg-hover); 
+  }
+  .pin-btn.pinned {
+    opacity: 1;
+    color: var(--accent);
+  }
+</style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-section">
+      <div class="sidebar-title">Main</div>
+      <a href="#" class="nav-item active"><span class="nav-icon">❖</span> App Directory</a>
+      <a href="#" class="nav-item"><span class="nav-icon">👤</span> My Account</a>
+      <a href="#" class="nav-item"><span class="nav-icon">⚙️</span> Settings</a>
+    </div>
+    
+    <div class="sidebar-section">
+      <div class="sidebar-title">
+        Pinned Favorites
+        <span style="font-size: 10px; cursor: pointer;" title="Edit pins">✏️</span>
+      </div>
+      <div id="pinnedList">
+        <!-- Pinned items injected by JS -->
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main">
+    <div class="header">
+      <h1>App Directory</h1>
+      <p style="color: var(--text-muted); margin: 0;">Discover, search, and pin all available features and tools.</p>
+      
+      <div class="search-container">
+        <span class="search-icon">🔍</span>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search features, tools, or settings...">
+        <span class="shortcut-hint">Cmd K</span>
+      </div>
+    </div>
+
+    <div class="content" id="featureGrid">
+      <!-- Categories and cards injected by JS -->
+    </div>
+  </main>
+
+  <script>
+    // Mock Data based on your screenshots
+    const features = [
+      { id: 'lib', title: "King Solomon's Library", desc: "Access the vast repository of knowledge, documents, and historical data.", category: "Learning & Content", icon: "📚", pinned: true },
+      { id: 'course', title: "Interactive Course", desc: "Engage with interactive training materials and track your progress.", category: "Learning & Content", icon: "🎓", pinned: false },
+      { id: 'reset', title: "Reset Course", desc: "Reset your progress on current courses to start fresh.", category: "Learning & Content", icon: "🔄", pinned: false },
+      
+      { id: 'social', title: "Social Media Manager", desc: "Schedule, manage, and analyze your social media posts across platforms.", category: "Marketing & Outreach", icon: "📱", pinned: false },
+      { id: 'd20', title: "Dream 20 Builder", desc: "Build and track your top 20 highest-value target accounts.", category: "Marketing & Outreach", icon: "🎯", pinned: false },
+      { id: 'd100', title: "Dream 100s", desc: "Manage your broader list of 100 target prospects and outreach.", category: "Marketing & Outreach", icon: "💯", pinned: false },
+      { id: 'comp', title: "Competitors", desc: "Track, analyze, and benchmark competitor activities.", category: "Marketing & Outreach", icon: "⚔️", pinned: false },
+      
+      { id: 'bot', title: "Embedded Chatbot", desc: "Configure your site's AI assistant, train data, and view logs.", category: "Tools & Integrations", icon: "🤖", pinned: true },
+      
+      { id: 'sherpa', title: "My Sherpa Account", desc: "Manage your Sherpa coaching profile and upcoming sessions.", category: "Organization", icon: "🏔️", pinned: false },
+      { id: 'frap', title: "My Frap Chapter", desc: "View local chapter details, upcoming events, and members.", category: "Organization", icon: "🏛️", pinned: false },
+      { id: 'nation', title: "FRAP Nationwide", desc: "Explore the national network and connect with other chapters.", category: "Organization", icon: "🗺️", pinned: false },
+      
+      { id: 'emp', title: "Employees", desc: "Manage employee records, onboarding, and details.", category: "Human Resources", icon: "👥", pinned: true },
+      { id: 'jobs', title: "Jobs", desc: "Post and manage job openings and applicant tracking.", category: "Human Resources", icon: "💼", pinned: false },
+      { id: 'access', title: "Access & Roles", desc: "Manage system roles, permissions, and security policies.", category: "Human Resources", icon: "🔐", pinned: false }
+    ];
+
+    const grid = document.getElementById('featureGrid');
+    const searchInput = document.getElementById('searchInput');
+    const pinnedList = document.getElementById('pinnedList');
+
+    function togglePin(id, e) {
+      e.stopPropagation(); // Prevent card click
+      const feature = features.find(f => f.id === id);
+      if (feature) {
+        feature.pinned = !feature.pinned;
+        renderAll();
+      }
+    }
+
+    function renderPinned() {
+      pinnedList.innerHTML = '';
+      const pinnedFeatures = features.filter(f => f.pinned);
+      
+      if (pinnedFeatures.length === 0) {
+        pinnedList.innerHTML = '<div style="color: var(--text-muted); font-size: 0.85rem; padding: 0.5rem 0;">No pinned items.</div>';
+        return;
+      }
+
+      pinnedFeatures.forEach(item => {
+        pinnedList.innerHTML += `
+          <a href="#" class="nav-item">
+            <span class="nav-icon">${item.icon}</span> 
+            <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.title}</span>
+          </a>
+        `;
+      });
+    }
+
+    function renderGrid(filterText = '') {
+      grid.innerHTML = '';
+      const lowerFilter = filterText.toLowerCase();
+
+      // Group by category
+      const categories = {};
+      features.forEach(f => {
+        if (f.title.toLowerCase().includes(lowerFilter) || f.desc.toLowerCase().includes(lowerFilter) || f.category.toLowerCase().includes(lowerFilter)) {
+          if (!categories[f.category]) categories[f.category] = [];
+          categories[f.category].push(f);
+        }
+      });
+
+      // Render
+      for (const [category, items] of Object.entries(categories)) {
+        const section = document.createElement('div');
+        section.innerHTML = `<h2 class="category-title">${category}</h2>`;
+        const cardGrid = document.createElement('div');
+        cardGrid.className = 'grid';
+
+        items.forEach(item => {
+          const pinClass = item.pinned ? 'pinned' : '';
+          const pinTitle = item.pinned ? 'Unpin from sidebar' : 'Pin to sidebar';
+          
+          cardGrid.innerHTML += `
+            <div class="card">
+              <div class="card-header">
+                <div class="card-title">
+                  <span>${item.icon}</span>
+                  ${item.title}
+                </div>
+                <button class="pin-btn ${pinClass}" title="${pinTitle}" onclick="togglePin('${item.id}', event)">📌</button>
+              </div>
+              <div class="card-desc">${item.desc}</div>
+            </div>
+          `;
+        });
+        section.appendChild(cardGrid);
+        grid.appendChild(section);
+      }
+
+      if (Object.keys(categories).length === 0) {
+        grid.innerHTML = `
+          <div style="text-align: center; padding: 4rem 0; color: var(--text-muted);">
+            <div style="font-size: 2rem; margin-bottom: 1rem;">🔍</div>
+            <p>No features found matching "${filterText}"</p>
+          </div>
+        `;
+      }
+    }
+
+    function renderAll() {
+      renderPinned();
+      renderGrid(searchInput.value);
+    }
+
+    // Event Listeners
+    searchInput.addEventListener('input', (e) => renderGrid(e.target.value));
+    
+    // Cmd+K shortcut to focus search
+    document.addEventListener('keydown', (e) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+      }
+    });
+
+    // Initial render
+    renderAll();
+  </script>
+</body>
+</html>
