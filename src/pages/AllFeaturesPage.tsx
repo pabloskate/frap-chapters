@@ -1,13 +1,14 @@
 import { useMemo, useState, useRef, useEffect, type ReactNode } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/Layout';
-import { useLayoutNav } from '../context/LayoutNavContext';
+import { useLayoutNav } from '../context/useLayoutNav';
 import {
   FEATURE_CATALOG,
   FEATURE_CATEGORY_ORDER,
   type FeatureCategory,
 } from '../data/featureCatalog';
-import { usePinnedFeatures, type PinLocation } from '../state/PinnedFeatures';
+import { type PinLocation } from '../state/pinnedFeaturesContext';
+import { usePinnedFeatures } from '../state/usePinnedFeatures';
 
 type TabKey = 'All' | FeatureCategory;
 
@@ -41,13 +42,12 @@ function matchesSearch(
 }
 
 interface PinDropdownProps {
-  featureId: string;
   currentLocation: PinLocation | null;
   onPin: (location: PinLocation) => void;
   onUnpin: () => void;
   isOpen: boolean;
   onClose: () => void;
-  triggerRef: React.RefObject<HTMLButtonElement | null>;
+  triggerElement: HTMLButtonElement | null;
 }
 
 function PinDropdown({
@@ -56,33 +56,31 @@ function PinDropdown({
   onUnpin,
   isOpen,
   onClose,
-  triggerRef,
+  triggerElement,
 }: PinDropdownProps) {
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const [position, setPosition] = useState({ top: 0, left: 0, above: false });
+  const dropdownHeight = 120;
+  const gap = 6;
+  const rect = triggerElement?.getBoundingClientRect();
+  const wouldGoOffScreenBelow = rect
+    ? rect.bottom + dropdownHeight + gap > window.innerHeight
+    : false;
+  const position = rect
+    ? {
+        top: wouldGoOffScreenBelow ? rect.top - dropdownHeight - gap : rect.bottom + gap,
+        left: rect.right - 160,
+        above: wouldGoOffScreenBelow,
+      }
+    : { top: 0, left: 0, above: false };
 
   useEffect(() => {
-    if (!isOpen || !triggerRef.current) return;
-
-    // Calculate position based on trigger button
-    const rect = triggerRef.current.getBoundingClientRect();
-    const dropdownHeight = 120; // Approximate height of dropdown
-    const gap = 6;
-
-    // Check if dropdown would go off-screen below
-    const wouldGoOffScreenBelow = rect.bottom + dropdownHeight + gap > window.innerHeight;
-
-    setPosition({
-      top: wouldGoOffScreenBelow ? rect.top - dropdownHeight - gap : rect.bottom + gap,
-      left: rect.right - 160, // Align right edge of dropdown with right edge of button
-      above: wouldGoOffScreenBelow,
-    });
+    if (!isOpen || !triggerElement) return;
 
     const handleClickOutside = (event: MouseEvent) => {
       if (
         dropdownRef.current &&
         !dropdownRef.current.contains(event.target as Node) &&
-        !triggerRef.current?.contains(event.target as Node)
+        !triggerElement.contains(event.target as Node)
       ) {
         onClose();
       }
@@ -90,7 +88,7 @@ function PinDropdown({
 
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isOpen, onClose, triggerRef]);
+  }, [isOpen, onClose, triggerElement]);
 
   if (!isOpen) return null;
 
@@ -163,8 +161,10 @@ function AllFeaturesContent() {
   const { pinFeature, unpinFeature, getPinLocation } = usePinnedFeatures();
   const [query, setQuery] = useState('');
   const [tab, setTab] = useState<TabKey>('All');
-  const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
-  const pinButtonRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const [openDropdown, setOpenDropdown] = useState<{
+    featureId: string;
+    triggerElement: HTMLButtonElement;
+  } | null>(null);
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -244,9 +244,13 @@ function AllFeaturesContent() {
     }
   };
 
-  const handlePinClick = (e: React.MouseEvent, featureId: string) => {
+  const handlePinClick = (e: React.MouseEvent<HTMLButtonElement>, featureId: string) => {
     e.stopPropagation();
-    setOpenDropdownId(openDropdownId === featureId ? null : featureId);
+    setOpenDropdown((current) =>
+      current?.featureId === featureId
+        ? null
+        : { featureId, triggerElement: e.currentTarget },
+    );
   };
 
   return (
@@ -357,11 +361,6 @@ function AllFeaturesContent() {
                           <div className="all-features-pin-wrap">
                             <button
                               type="button"
-                              ref={(el) => {
-                                if (el) {
-                                  pinButtonRefs.current.set(entry.id, el);
-                                }
-                              }}
                               className={`all-features-pin${isPinnedAnywhere ? ' is-pinned' : ''}`}
                               onClick={(e) => handlePinClick(e, entry.id)}
                               aria-pressed={isPinnedAnywhere}
@@ -394,15 +393,16 @@ function AllFeaturesContent() {
                               </svg>
                             </button>
                             <PinDropdown
-                              featureId={entry.id}
                               currentLocation={location}
                               onPin={(loc) => pinFeature(entry.id, loc)}
                               onUnpin={() => unpinFeature(entry.id)}
-                              isOpen={openDropdownId === entry.id}
-                              onClose={() => setOpenDropdownId(null)}
-                              triggerRef={{
-                                current: pinButtonRefs.current.get(entry.id) ?? null,
-                              }}
+                              isOpen={openDropdown?.featureId === entry.id}
+                              onClose={() => setOpenDropdown(null)}
+                              triggerElement={
+                                openDropdown?.featureId === entry.id
+                                  ? openDropdown.triggerElement
+                                  : null
+                              }
                             />
                           </div>
                         </div>

@@ -1,19 +1,15 @@
 import {
-  createContext,
   useCallback,
-  useContext,
   useEffect,
   useState,
   type ReactNode,
 } from 'react';
 import { FEATURE_CATALOG } from '../data/featureCatalog';
-
-export type PinLocation = 'sidebar' | 'homepage';
-
-export interface PinnedItem {
-  id: string;
-  location: PinLocation;
-}
+import {
+  PinnedFeaturesContext,
+  type PinLocation,
+  type PinnedItem,
+} from './pinnedFeaturesContext';
 
 const pinnedFeaturesStorageKey = 'profitAcademy.pinnedFeatures';
 
@@ -67,19 +63,6 @@ function savePinnedItems(items: PinnedItem[]) {
     // Ignore storage failures
   }
 }
-
-interface PinnedFeaturesValue {
-  pinnedItems: PinnedItem[];
-  sidebarIds: string[];
-  homepageIds: string[];
-  pinFeature: (id: string, location: PinLocation) => void;
-  unpinFeature: (id: string, location?: PinLocation) => void;
-  movePin: (id: string, from: PinLocation, to: PinLocation) => void;
-  isPinned: (id: string, location?: PinLocation) => boolean;
-  getPinLocation: (id: string) => PinLocation | null;
-}
-
-const PinnedFeaturesContext = createContext<PinnedFeaturesValue | null>(null);
 
 export function PinnedFeaturesProvider({ children }: { children: ReactNode }) {
   const [pinnedItems, setPinnedItems] = useState<PinnedItem[]>(loadPinnedItems);
@@ -154,14 +137,4 @@ export function PinnedFeaturesProvider({ children }: { children: ReactNode }) {
       {children}
     </PinnedFeaturesContext.Provider>
   );
-}
-
-export function usePinnedFeatures() {
-  const context = useContext(PinnedFeaturesContext);
-
-  if (!context) {
-    throw new Error('usePinnedFeatures must be used within PinnedFeaturesProvider');
-  }
-
-  return context;
 }

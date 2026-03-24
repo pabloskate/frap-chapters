@@ -2,8 +2,8 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { LayoutNavProvider } from '../context/LayoutNavContext';
 import { getFeatureById } from '../data/featureCatalog';
-import { usePinnedFeatures } from '../state/PinnedFeatures';
-import { useAppState } from '../state/AppState';
+import { usePinnedFeatures } from '../state/usePinnedFeatures';
+import { useAppState } from '../state/useAppState';
 import type { NavVariant, SidebarKey } from '../types';
 import { ChatPanel } from './ChatPanel';
 

@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { AppLayout } from '../components/Layout';
-import { useLayoutNav } from '../context/LayoutNavContext';
+import { useLayoutNav } from '../context/useLayoutNav';
 import { getFeatureById } from '../data/featureCatalog';
-import { useAppState } from '../state/AppState';
-import { usePinnedFeatures } from '../state/PinnedFeatures';
+import { useAppState } from '../state/useAppState';
+import { usePinnedFeatures } from '../state/usePinnedFeatures';
 
 function getFeatureIcon(featureId: string) {
   // Return appropriate icon based on feature id

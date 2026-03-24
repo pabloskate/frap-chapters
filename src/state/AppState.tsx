@@ -1,23 +1,11 @@
 import {
-  createContext,
-  useContext,
   useEffect,
   useState,
-  type Dispatch,
   type ReactNode,
-  type SetStateAction,
 } from 'react';
+import { AppStateContext } from './appStateContext';
 import { defaultSwaps, onboardingStorageKey, swapsStorageKey } from '../data';
 import type { SwapItem } from '../types';
-
-interface AppStateValue {
-  onboardingComplete: boolean;
-  setOnboardingComplete: Dispatch<SetStateAction<boolean>>;
-  swaps: SwapItem[];
-  setSwaps: Dispatch<SetStateAction<SwapItem[]>>;
-}
-
-const AppStateContext = createContext<AppStateValue | null>(null);
 
 function loadOnboardingComplete() {
   try {
@@ -77,14 +65,4 @@ export function AppStateProvider({ children }: { children: ReactNode }) {
       {children}
     </AppStateContext.Provider>
   );
-}
-
-export function useAppState() {
-  const context = useContext(AppStateContext);
-
-  if (!context) {
-    throw new Error('useAppState must be used inside AppStateProvider');
-  }
-
-  return context;
 }

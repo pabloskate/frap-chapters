@@ -20,10 +20,51 @@ function isSwapType(value: string | null): value is SwapTypeId {
 export function GeneratorPage() {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  const generatorContentRef = useRef<HTMLDivElement>(null);
   const rawType = searchParams.get('type');
   const currentType = isSwapType(rawType) ? rawType : 'email';
   const currentPartner = searchParams.get('partner') || defaultPartnerBusiness;
+
+  const handleBack = () => {
+    if (window.history.length > 1) {
+      navigate(-1);
+      return;
+    }
+
+    navigate('/dashboard');
+  };
+
+  const selectSwapType = (type: SwapTypeId) => {
+    setSearchParams({
+      partner: currentPartner,
+      type,
+    });
+  };
+
+  return (
+    <GeneratorPageContent
+      key={`${currentType}:${currentPartner}`}
+      currentPartner={currentPartner}
+      currentType={currentType}
+      onBack={handleBack}
+      onSelectSwapType={selectSwapType}
+    />
+  );
+}
+
+interface GeneratorPageContentProps {
+  currentPartner: string;
+  currentType: SwapTypeId;
+  onBack: () => void;
+  onSelectSwapType: (type: SwapTypeId) => void;
+}
+
+function GeneratorPageContent({
+  currentPartner,
+  currentType,
+  onBack,
+  onSelectSwapType,
+}: GeneratorPageContentProps) {
+  const generatorContentRef = useRef<HTMLDivElement>(null);
   const [activeTone, setActiveTone] = useState('');
   const [isGenerating, setIsGenerating] = useState(false);
   const [copyAllDone, setCopyAllDone] = useState(false);
@@ -31,12 +72,6 @@ export function GeneratorPage() {
   const [isSwapTypeModalOpen, setIsSwapTypeModalOpen] = useState(false);
 
   useLockedBody(isSwapTypeModalOpen);
-
-  useEffect(() => {
-    setActiveTone('');
-    setCopyAllDone(false);
-    setCopyEmailSubjectDone(false);
-  }, [currentType, currentPartner]);
 
   useEffect(() => {
     if (!isSwapTypeModalOpen) {
@@ -52,15 +87,6 @@ export function GeneratorPage() {
     window.addEventListener('keydown', handleEscape);
     return () => window.removeEventListener('keydown', handleEscape);
   }, [isSwapTypeModalOpen]);
-
-  const handleBack = () => {
-    if (window.history.length > 1) {
-      navigate(-1);
-      return;
-    }
-
-    navigate('/dashboard');
-  };
 
   const handleCopyEmailSubject = async () => {
     try {
@@ -115,14 +141,6 @@ Implementation:
     }, 1500);
   };
 
-  const selectSwapType = (type: SwapTypeId) => {
-    setSearchParams({
-      partner: currentPartner,
-      type,
-    });
-    setIsSwapTypeModalOpen(false);
-  };
-
   const showThankYouView = currentType === 'thankyou';
   const showFineTuneControls = tunableTypes.includes(currentType);
 
@@ -151,7 +169,7 @@ Implementation:
             <button
               className="change-partner-btn"
               id="changePartnerBtn"
-              onClick={handleBack}
+              onClick={onBack}
               type="button"
             >
               ← Back
@@ -716,7 +734,10 @@ Implementation:
                     className="swap-type-selector"
                     data-swap-type={item.type}
                     key={item.type}
-                    onClick={() => selectSwapType(item.type)}
+                    onClick={() => {
+                      onSelectSwapType(item.type);
+                      setIsSwapTypeModalOpen(false);
+                    }}
                     style={{
                       background: 'var(--bg-primary)',
                       border: '1px solid var(--border-light)',

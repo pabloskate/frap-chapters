@@ -1,5 +1,5 @@
 import { AppLayout } from '../components/Layout';
-import { useAppState } from '../state/AppState';
+import { useAppState } from '../state/useAppState';
 
 export function OnboardingPage() {
   const { onboardingComplete, setOnboardingComplete } = useAppState();

@@ -1,10 +1,5 @@
-import { createContext, useContext, type ReactNode } from 'react';
-
-export interface LayoutNavContextValue {
-  openChat: () => void;
-}
-
-const LayoutNavContext = createContext<LayoutNavContextValue | null>(null);
+import type { ReactNode } from 'react';
+import { LayoutNavContext } from './layoutNavStore';
 
 export function LayoutNavProvider({
   children,
@@ -18,14 +13,4 @@ export function LayoutNavProvider({
       {children}
     </LayoutNavContext.Provider>
   );
-}
-
-export function useLayoutNav() {
-  const value = useContext(LayoutNavContext);
-
-  if (!value) {
-    throw new Error('useLayoutNav must be used within LayoutNavProvider');
-  }
-
-  return value;
 }
